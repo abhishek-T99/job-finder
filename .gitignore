@@ -1,0 +1,5 @@
+node_modules
+*.env
+*.vscode
+client/.eslintcache
+db

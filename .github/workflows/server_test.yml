@@ -1,0 +1,74 @@
+name: Branch Testing
+
+on:
+    push:
+        branches:
+            - 'develop'
+            - 'main'
+    pull_request:
+        branches:
+            - 'develop'
+            - 'main'
+
+jobs:
+    test-server:
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:latest
+                ports:
+                    - 5432:5432
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_HOST: localhost
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: job_board_test_db
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        env:
+            POSTGRES_USER: postgres
+            POSTGRES_HOST: localhost
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: job_board_db
+            POSTGRES_DB_TEST: job_board_test_db
+            POSTGRES_PORT: 5432
+            NODE_ENV: test
+            SECRET: secret
+            REFRESH_SECRET: refreshsecret 
+            
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: '20'
+
+            - name: Install server dependencies
+              run: |
+                cd server
+                npm install
+
+            - name: Wait for PostgreSQL
+              run: |
+                sudo apt-get install -y netcat
+                until nc -zv localhost 5432; do
+                    echo "Waiting for PostgreSQL to be ready..."
+                    sleep 1
+                done
+                echo "PostgreSQL is ready"
+
+            - name: Initialize Database
+              run: |
+                PGPASSWORD=postgres psql -h localhost -U postgres -d job_board_test_db -f server/config/init.sql
+
+            - name: Run server test
+              run: |
+                cd server
+                npm run test

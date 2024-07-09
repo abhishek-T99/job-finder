@@ -1,0 +1,14 @@
+services:
+  database:
+    container_name: job-board-db
+    image: postgres
+    restart: always
+    env_file:
+      - ./server/.env
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 1234:5432
+    volumes:
+      - ./db:/var/lib/postgresql/data
+      - ./server/config/init.sql:/docker-entrypoint-initdb.d/init.sql

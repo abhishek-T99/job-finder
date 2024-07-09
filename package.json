@@ -1,0 +1,19 @@
+{
+    "name": "job-finder",
+    "version": "1.0.0",
+    "main": "index.js",
+    "dependencies": {
+      "concurrently": "^7.6.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "start": "node server",
+      "server": "cd server && nodemon",
+      "client": "npm start --prefix client",
+      "dev": "concurrently \"npm run server\" \"npm run client\""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": ""
+}
